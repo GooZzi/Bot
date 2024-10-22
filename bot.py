@@ -22,7 +22,7 @@ def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Бот запущен!')
 
 def main() -> None:
-    updater = Updater("YOUR_TOKEN_HERE")
+    updater = Updater("7686011006:AAGePIRZ_KGE-yww0zhlTUy5BNXQTnhdEAU")
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))
@@ -30,7 +30,7 @@ def main() -> None:
 
     # Запланировать отправку отчета в конце дня
     job_queue = updater.job_queue
-    job_queue.run_daily(send_report, time=datetime.time(hour=23, minute=59), context='YOUR_CHAT_ID_HERE')
+    job_queue.run_daily(send_report, time=datetime.time(hour=23, minute=59), context='-1001980493060')
 
     updater.start_polling()
     updater.idle()
