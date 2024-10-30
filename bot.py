@@ -6,7 +6,7 @@ import datetime
 message_count = {}
 
 # Список ID групп, в которых бот будет отслеживать сообщения
-group_ids = {'-1001980493060', '7686011006'}  # Замените на ваши ID групп
+group_ids = {'-1002196532000','-1001775046025','-1001343504125','-1001294018674','-1001656540195','-1001867637705','-1001857285435','-1002196532000'}  # Замените на ваши ID групп
 
 # Список разрешенных пользователей
 allowed_users = {123456789, 987654321}  # Замените на ID разрешенных пользователей
@@ -37,7 +37,7 @@ async def count_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
     if user_id not in allowed_users:
-        await update.message.reply_text("У вас нет прав для выполнения этой команды.")
+        await update.message.reply_text("")
         return
 
     report = await generate_report()
