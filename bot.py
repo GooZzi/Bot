@@ -6,10 +6,14 @@ import datetime
 message_count = {}
 
 # Список ID групп, в которых бот будет отслеживать сообщения
-group_ids = {'-1002196532000','-1001775046025','-1001343504125','-1001294018674','-1001656540195','-1001867637705','-1001857285435','-1002196532000'}  # Замените на ваши ID групп
+group_ids = {
+    '-1002196532000', '-1001775046025', '-1001343504125',
+    '-1001294018674', '-1001656540195', '-1001867637705',
+    '-1001857285435', '-1002196532000', '-1001980493060'
+}  # Замените на ваши ID групп
 
 # Список разрешенных пользователей
-allowed_users = {123456789, 987654321}  # Замените на ID разрешенных пользователей
+allowed_users = {785492955, 1782689461}  # Замените на ID разрешенных пользователей
 
 # ID группы для отправки отчета
 report_group_id = '-4564729970'  # Замените на ваш ID группы
@@ -23,7 +27,11 @@ async def count_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if chat_id in group_ids:
         # Инициализируем данные группы, если они отсутствуют
         if chat_id not in message_count:
-            message_count[chat_id] = {'total_messages': 0, 'users': {}}
+            message_count[chat_id] = {
+                'total_messages': 0,
+                'users': {},
+                'group_name': update.message.chat.title  # Сохраняем название группы
+            }
 
         # Увеличиваем общее количество сообщений в группе
         message_count[chat_id]['total_messages'] += 1
@@ -51,7 +59,7 @@ async def generate_report() -> str:
     else:
         for chat_id, data in message_count.items():
             # Получаем информацию о группе
-            group_name = "Неизвестная группа"  # Заглушка, если название не будет получено
+            group_name = data['group_name']  # Используем сохраненное название группы
             report += f"\nСтатистика для группы '{group_name}':\n"
             report += f"Всего сообщений: {data['total_messages']}\n"
             for user_id, user_data in data['users'].items():
