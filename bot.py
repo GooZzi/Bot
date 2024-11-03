@@ -62,7 +62,7 @@ async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
 
     report = await generate_report()
-    await send_long_message(update.message.chat.id, report)
+    await send_long_message(context, update.message.chat.id, report)
 
 async def generate_report() -> str:
     report = f"Отчет на {datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d')}:\n"
@@ -80,7 +80,7 @@ async def generate_report() -> str:
     
     return report
 
-async def send_long_message(chat_id, text):
+async def send_long_message(context, chat_id, text):
     max_length = 4096  # Максимальная длина сообщения в Telegram
     for i in range(0, len(text), max_length):
         await context.bot.send_message(chat_id=chat_id, text=text[i:i + max_length])
@@ -88,7 +88,7 @@ async def send_long_message(chat_id, text):
 async def send_daily_report(context: ContextTypes.DEFAULT_TYPE) -> None:
     await clear_data()  # Очищаем данные в конце дня
     report = await generate_report()
-    await send_long_message(report_group_id, report)
+    await send_long_message(context, report_group_id, report)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
@@ -99,7 +99,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Бот запущен! Используйте /report для получения отчета.')
 
 def main() -> None:
-    application = ApplicationBuilder().token("YOUR_BOT_TOKEN").build()
+    application = ApplicationBuilder().token("7686011006:AAGePIRZ_KGE-yww0zhlTUy5BNXQTnhdEAU").build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("report", send_report))
