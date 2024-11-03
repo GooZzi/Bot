@@ -1,6 +1,8 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import datetime
+import json
+import pytz  # Не забудьте установить pytz, если он еще не установлен
 
 # Словарь для хранения статистики сообщений
 message_count = {}
@@ -18,6 +20,16 @@ allowed_users = {785492955, 1782689461, 961325088, 1270457445}  # Заменит
 
 # ID группы для отправки отчета
 report_group_id = '-4564729970'  # Замените на ваш ID группы
+
+# Функция для сохранения данных в JSON
+def save_to_json():
+    with open('message_count.json', 'w', encoding='utf-8') as f:
+        json.dump(message_count, f, ensure_ascii=False, indent=4)
+
+# Функция для очистки данных
+async def clear_data() -> None:
+    message_count.clear()
+    save_to_json()  # Сохраняем пустой словарь в файл
 
 async def count_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = str(update.message.from_user.id)
@@ -50,10 +62,10 @@ async def send_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
 
     report = await generate_report()
-    await update.message.reply_text(report)
+    await send_long_message(update.message.chat.id, report)
 
 async def generate_report() -> str:
-    report = f"Отчет на {datetime.datetime.now().strftime('%Y-%m-%d')}:\n"
+    report = f"Отчет на {datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d')}:\n"
     
     if not message_count:
         report += "Нет данных для отчета.\n"
@@ -68,13 +80,15 @@ async def generate_report() -> str:
     
     return report
 
-async def send_daily_report(context: ContextTypes.DEFAULT_TYPE) -> None:
-    report = await generate_report()
-    await context.bot.send_message(chat_id=report_group_id, text=report)
+async def send_long_message(chat_id, text):
+    max_length = 4096  # Максимальная длина сообщения в Telegram
+    for i in range(0, len(text), max_length):
+        await context.bot.send_message(chat_id=chat_id, text=text[i:i + max_length])
 
-async def clear_data() -> None:
-    # Очищаем данные в конце дня
-    message_count.clear()
+async def send_daily_report(context: ContextTypes.DEFAULT_TYPE) -> None:
+    await clear_data()  # Очищаем данные в конце дня
+    report = await generate_report()
+    await send_long_message(report_group_id, report)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
@@ -85,14 +99,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Бот запущен! Используйте /report для получения отчета.')
 
 def main() -> None:
-    application = ApplicationBuilder().token("7686011006:AAGePIRZ_KGE-yww0zhlTUy5BNXQTnhdEAU").build()
+    application = ApplicationBuilder().token("YOUR_BOT_TOKEN").build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("report", send_report))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, count_messages))
 
     # Запланировать отправку отчета в конце дня
-    application.job_queue.run_daily(send_daily_report, time=datetime.time(hour=23, minute=59))
+    application.job_queue.run_daily(send_daily_report, time=datetime.time(hour=23, minute=59, tzinfo=pytz.timezone('Europe/Moscow')))
 
     application.run_polling()
 
