@@ -28,8 +28,8 @@ def save_to_json():
 
 # Функция для очистки данных
 async def clear_data() -> None:
+    save_to_json()  # Сохраняем текущие данные в файл перед очисткой
     message_count.clear()
-    save_to_json()  # Сохраняем пустой словарь в файл
 
 async def count_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = str(update.message.from_user.id)
@@ -86,9 +86,9 @@ async def send_long_message(context, chat_id, text):
         await context.bot.send_message(chat_id=chat_id, text=text[i:i + max_length])
 
 async def send_daily_report(context: ContextTypes.DEFAULT_TYPE) -> None:
-    await clear_data()  # Очищаем данные в конце дня
     report = await generate_report()
     await send_long_message(context, report_group_id, report)
+    await clear_data()  # Очищаем данные после отправки отчета
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
